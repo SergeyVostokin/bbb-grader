@@ -1,4 +1,5 @@
 import gspread
+import os
 
 
 def getStarsList(path):
@@ -13,9 +14,9 @@ def getStarsList(path):
     return starsArray
 
 
-def createBackUp(worksheet, diapason):
+def createBackUp(worksheet, diapason, backupFileName):
     backUpData = worksheet.get(diapason)
-    backUpfile = open("backup.txt", "w")
+    backUpfile = open(backupFileName, "w")
     text = ""
     lastElement = False
     lastElementIndex = len(backUpData)
@@ -53,13 +54,13 @@ def getAdressRange(adress, length):
     return result
 
 
-def updateTableDate(columnName, tableName, passwordFileName, nameStarsFile):
+def updateTableDate(columnName, tableName, passwordFileName, nameStarsFile, nameBackUpFile):
     starsList = getStarsList(nameStarsFile)
     gc = gspread.service_account(filename=passwordFileName)
     worksheet = gc.open(tableName).get_worksheet(0)
     columnCellAdress = worksheet.find(columnName).address
     diapason = getAdressRange(columnCellAdress, len(starsList) - 1)
-    createBackUp(worksheet, diapason)
+    createBackUp(worksheet, diapason, nameBackUpFile)
     worksheet.update(diapason, starsList)
 
 
@@ -70,5 +71,3 @@ def restoreBackUp(columnName, tableName, passwordFileName, nameBackUpFile):
     columnCellAdress = worksheet.find(columnName).address
     diapason = getAdressRange(columnCellAdress, len(backedUpList) - 1)
     worksheet.update(diapason, backedUpList)
-
-#restoreBackUp("Л12", "Тестовый ввод", "awesome-delight-371517-2deba832a677.json", "backup.txt")
